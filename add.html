@@ -50,27 +50,25 @@
                     <button id="searchBtn" class="btn btn-success search-btn">Search</button>
                 </div>
             </div>
+           
             <!-- === Fancy results === -->
             <div id="displayResult" class="search-result  mx-auto ">
                 
                 <!-- single result -->
                 <div  class="single-result row align-items-center my-3 p-3">
-                    <div  class="col-md-9">
-                        <h3 align=center id="lyricsAlign" class="lyrics-name">These are your Search Results!!!</h3>
-                        <!-- <p class="author lead">Album by <span >Washed Out</span></p> -->
+                    <div  class="col-md-12">
+                        <h3 class="lyrics-name">Results will be displayed here</h3>
                     </div>
-                    <!-- <div class="col-md-3 text-md-right text-center">
-                        <button class="btn btn-success">Get Lyrics</button> -->
-                    
-                </div></div>
-                <!-- ./ single result -->
-
+                   
+                </div>
             </div>
+            <div id="more" class="container centered"></div>
+</main>
 </div>
 
 
-        </main>
-    </div>
+        
+
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
@@ -84,7 +82,7 @@
     let searchResults = document.getElementById("searchResults")
     let searchBtn = document.getElementById("searchBtn")
 
-    const apiURL = 'https://api.lyrics.ovh';
+    const apiURL= 'https://api.lyrics.ovh';
 
     searchBtn.addEventListener("click", function(){
         fetch(`https://api.lyrics.ovh/suggest/${inputSong.value}`)
@@ -99,62 +97,93 @@
                     albumName: element.album.title,
                     albumCover: element.album.cover
                 }
-        
-                list.push(item)
+
+                // console.log(artistName)
+                    list.push(item)
                 
             }
         
         console.log(list)
         console.log(data)
-
+    
         let displayResult = document.getElementById('displayResult')
         for (let i = 0; i < 10; i++) {
-            const {songName, artistName} = list[i];
+            const {songName, artistName, albumName, albumCover} = list[i];
             let displayResult = document.getElementById('displayResult')
                 displayResult.style.display = "block"
                 document.getElementById("displayResult").innerHTML += 
-                        
                 `<div  class="search-result col-md-8 mx-auto py-4">
-                    <div class="single-result row align-items-center my-3 p-3">
-                    <div class="col-md-9">
-                        <h3 class="lyrics-name">${songName}</h3>
-                        <p class="author lead">Album by <span id="artistName">${artistName}</span></p>
-                    </div>
-                    <div class="col-md-3 text-md-right text-center">
-                        <button class="btn btn-success" data-artist='${artistName}' data-songTitle='${songName}'>Get Lyrics</button>
-                    </div>
-                    </div>
-                    </div>`
-                            
-        }   
+                <div class="single-result row align-items-center my-3 p-3">
+                    <div class="col-md-3">
+                    
+                    <img src="${albumCover}" alt="">
+               </div>
+                <div class="col-md-6">
+                    <h3 class="lyrics-name">${songName}</h3>
+                    <p class="author lead">Album by <span id="artistName">${artistName}</span></p>
+                    <p class="author lead">Album Name: <span id="artistName">${albumName}</span></p>
+                </div>
+                
+                <div class="col-md-3 text-md-right text-center">
+                    <button class="btn btn-success" data-artist='${artistName}' data-songTitle='${songName}' data-album='${albumName}' data-cover='${albumCover}'>Get Lyrics</button>
+                </div>
+                </div>
+                </div>`
+        }  
+                if(data.prev || data.next){
+                more.innerHTML= ` ${data.prev
+                                            ? `<button class="btn" onclick="getMoreSongs('${data.prev}')">Prev </button>` : ''  }
+                                ${data.next
+                                            ? `<button class="btn" onclick="getMoreSongs('${data.next}')">Next </button>` : ''  }
+                `;
+
+                }else {
+                    more.innerHTML='';
+
+     }
           
-        })
-        
     })
-    displayResult.addEventListener('click', e=>{
-    const clickedElement = e.target;
 
-    if (clickedElement.tagName === 'BUTTON'){
-        const artist = clickedElement.getAttribute('data-artist');
-        const songTitle = clickedElement.getAttribute('data-songTitle');
-        
-        getLyrics(artist, songTitle)
-    }
-})
-
-
-async function getLyrics(artist, songTitle) {
-    const res = await fetch(`${apiURL}/v1/${artist}/${songTitle}`);
-    const data = await res.json();
-  
-    const lyrics = data.lyrics.replace(/(\r\n|\r|\n)/g, '<br>');
-  
-    displayResult.innerHTML = `<h2><strong>${artist}</strong> - ${songTitle}</h2>
-    <p>${lyrics}</p>`;
-  
-  }
+       
+    })
     
+
+    async function getMoreSongs(url){
+        const res = await fetch (`https://cros-anywhere.herokaupp.com/${url}`);
+        const data = await res.json();
+
+        showData(data);
+    }
+
+
+    displayResult.addEventListener('click', e=>{
+        const clickedElement = e.target;
+    
+        if (clickedElement.tagName === 'BUTTON'){
+            const dataArtist = clickedElement.getAttribute('data-artist');
+            const dataSongTitle = clickedElement.getAttribute('data-songTitle');
+            const dataAlbum = clickedElement.getAttribute('data-album');
+            const dataCover = clickedElement.getAttribute('data-cover');
+            
+            getLyrics(dataArtist, dataSongTitle, dataAlbum, dataCover)
+        }
+        })
+
+
+async function getLyrics(dataArtist, dataSongTitle, dataAlbum, dataCover) {
+    const res = await fetch(`${apiURL}/v1/${dataArtist}/${dataSongTitle}/`);
+    const data = await res.json();
+
+    const lyrics = data.lyrics.replace(/(\r\n|\r|\n)/g, '<br>');
+
+    displayResult.innerHTML = `<h2><strong>${artist}</strong>-${songTitle}</h2> <img src="${dataCover}" alt="">
+    <br><p>${lyrics}</p>`;
+  
+     }
+
 </script>
 </body>
 
 </html>
+
+
