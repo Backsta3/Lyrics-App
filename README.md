@@ -68,3 +68,5 @@ Have lyrics search option and error on empty search.
 <br />
 <br />
 <br />
+
+## assignment-hard-rock-lyrics
